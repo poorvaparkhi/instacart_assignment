@@ -45,15 +45,6 @@ class GetSingleTeamMemberTest(TestCase):
         self.admin = TeamMember.objects.create(
             first_name='Poorva', last_name='Parkhi', phone_number=9990361047, role='Admin',
             email='poorvaparkhi@gmail.com')
-        # self.team_member_one = TeamMember.objects.create(
-        #     first_name='John', last_name='Oliver', phone_number=9938328047, role='Regular',
-        #     email='johnoli@gmail.com')
-        # self.team_member_two = TeamMember.objects.create(
-        #     first_name='Adam', last_name='Driver', phone_number=9938328047, role='Regular',
-        #     email='adamdriver@gmail.com')
-        # self.team_member_three = TeamMember.objects.create(
-        #     first_name='Christian', last_name='Bale', phone_number=9938328047, role='Regular',
-        #     email='christian_bale@gmail.com')
 
     def test_get_valid_single_team_member(self):
         response = self.client.get(reverse('team-member:team-member-detail', args=[self.admin.id]), format='json')
