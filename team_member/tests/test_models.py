@@ -7,7 +7,7 @@ class TeamMemberTest(TestCase):
 
     def setUp(self):
         TeamMember.objects.create(
-            first_name='Poorva', last_name='Parkhi', phone_number=9990361047, role='Admin',
+            first_name='Pooja', last_name='Parkhi', phone_number=9990361047, role='Admin',
             email='poorvaparkhi@gmail.com')
         TeamMember.objects.create(
             first_name='Apoorva', last_name='Nair', phone_number=9938328047, role='Regular',

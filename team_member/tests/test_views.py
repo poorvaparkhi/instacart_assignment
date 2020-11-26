@@ -8,11 +8,11 @@ import json
 
 # initialize the APIClient app
 client = Client()
-LIST_ALL_TEAM_MEMBERS_URL = reverse('team-member:list-all-team-members')
+TEAM_MEMBERS_URL = reverse('team-member:team-members')
 
 
 class GetAllTeamMembersTest(TestCase):
-    """ Test module for GET all team members API """
+    """ Test module for all team members API """
 
     def setUp(self):
         TeamMember.objects.create(
@@ -30,7 +30,7 @@ class GetAllTeamMembersTest(TestCase):
 
     def test_get_all_team_members(self):
         # get API response
-        response = self.client.get(LIST_ALL_TEAM_MEMBERS_URL, format='json')
+        response = self.client.get(TEAM_MEMBERS_URL, format='json')
         # get data from db
         team_members = TeamMember.objects.all()
         serializer = TeamMemberSerializer(team_members, many=True)
@@ -38,8 +38,35 @@ class GetAllTeamMembersTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
+class CreateNewTeamMemberTest(TestCase):
+    """ Test module for inserting a new team member """
+
+    def setUp(self):
+        self.valid_payload = {'first_name': 'John', 'last_name': 'Oliver', 'phone_number': 9938328047,
+                              'role': 'Regular', 'email': 'johnoli@gmail.com'}
+
+        self.invalid_payload = {'first_name': 'John', 'last_name': 'Oliver', 'phone_number': 'wrong_phone_number',
+                                'role': 'Regular', 'email': 'johnoli@gmail.com'}
+
+    def test_create_valid_team_member(self):
+        response = self.client.post(
+            reverse(TEAM_MEMBERS_URL),
+            data=json.dumps(self.valid_payload),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_invalid_team_member(self):
+        response = self.client.post(
+            reverse(TEAM_MEMBERS_URL),
+            data=json.dumps(self.invalid_payload),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
 class GetSingleTeamMemberTest(TestCase):
-    """ Test module for GET single team member API """
+    """ Test module for getting a single team member API """
 
     def setUp(self):
         self.admin = TeamMember.objects.create(
@@ -58,35 +85,8 @@ class GetSingleTeamMemberTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class CreateNewteam_memberTest(TestCase):
-    """ Test module for inserting a new team member """
-
-    def setUp(self):
-        self.valid_payload = {'first_name': 'John', 'last_name': 'Oliver', 'phone_number': 9938328047,
-                              'role': 'Regular', 'email': 'johnoli@gmail.com'}
-
-        self.invalid_payload = {'first_name': 'John', 'last_name': 'Oliver', 'phone_number': 'wrong_phone_number',
-                                'role': 'Regular', 'email': 'johnoli@gmail.com'}
-
-    def test_create_valid_team_member(self):
-        response = self.client.post(
-            reverse('team-member:team-member-detail', args=[4]),
-            data=json.dumps(self.valid_payload),
-            content_type='application/json'
-        )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-    def test_create_invalid_team_member(self):
-        response = self.client.post(
-            reverse('team-member:team-member-detail', args=[99]),
-            data=json.dumps(self.invalid_payload),
-            content_type='application/json'
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-
-class UpdateSingleTeamMemberTest(TestCase):
-    """ Test module for updating an existing team member record """
+class PutUpdateSingleTeamMemberTest(TestCase):
+    """ Test module for put updating an existing team member record """
 
     def setUp(self):
         self.team_member_three = TeamMember.objects.create(first_name='Christian', last_name='Bale',
@@ -110,6 +110,37 @@ class UpdateSingleTeamMemberTest(TestCase):
 
     def test_invalid_update_team_member(self):
         response = client.put(
+            reverse('team-member:team-member-detail', args=[self.team_member_two.id]),
+            data=json.dumps(self.invalid_payload),
+            content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class PatchUpdateSingleTeamMemberTest(TestCase):
+    """ Test module for patch updating an existing team member record """
+
+    def setUp(self):
+        self.team_member_three = TeamMember.objects.create(first_name='Christian', last_name='Bale',
+                                                           phone_number=8083334443, role='Regular',
+                                                           email='christian_bale@gmail.com')
+        self.team_member_two = TeamMember.objects.create(
+            first_name='Adam', last_name='Driver', phone_number=9938328047, role='Regular',
+            email='adamdriver@gmail.com')
+        self.valid_payload = {'first_name': 'Christian', 'last_name': 'Bale', 'phone_number': 9938328047,
+                              'role': 'Admin', 'email': 'christian_bale@yahoo.com'}
+        self.invalid_payload = {'first_name': '', 'last_name': 'Driver', 'phone_number': 9938328047,
+                                'role': 'Regular', 'email': 'adamdriver@gmail.com'}
+
+    def test_valid_update_team_member(self):
+        response = client.patch(
+            reverse('team-member:team-member-detail', args=[self.team_member_three.id]),
+            data=json.dumps(self.valid_payload),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_invalid_update_team_member(self):
+        response = client.patch(
             reverse('team-member:team-member-detail', args=[self.team_member_two.id]),
             data=json.dumps(self.invalid_payload),
             content_type='application/json')
